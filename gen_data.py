@@ -544,12 +544,18 @@ def get_train_data(exchange, save_folder):
     get_exchange_data(exchange)
     # get_exchange_train_data(exchange, save_folder)
 
+def gen_a_data():
+    get_exchange_data('a')
+    get_exchange_growth_death_data('a', 'D:')
+
 if __name__ == '__main__':
     # get_train_data('Kuala', 'D:')
     # get_exchange_train_data('Taiwan', 'D:')
     # get_exchange_train_data('Tokyo', 'D:')
     # gen_growth_death_data('D:')
     # get_exchange_train_data('Taiwan', 'D:')
-    gen_growth_death_data('D:')
+    # gen_growth_death_data('D:')
     # get_exchange_financial_forecast_data('Shenzhen', 'D:')
     # gen_financial_forecast_data('D:')
+    # get_exchange_data('a')
+    get_exchange_growth_death_data('a', 'D:')

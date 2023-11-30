@@ -71,7 +71,7 @@ def write_growth_death_data(file_list, csv_name):
         if os.path.exists(csv_name) == False:
             data.to_csv(csv_name, mode='a', header=True, index=False)
 
-    data_17 = pd.read_csv(csv_name, engine='pyarrow')
+    data_17 = pd.read_csv(csv_name)
     for i in tqdm(range(len(file_list))):
         file = file_list[i]
         basename = os.path.basename(file)
@@ -130,8 +130,39 @@ def copy_growth_death_data(src_folder):
     write_growth_death_data(train_file_list, csv_train_file)
     write_growth_death_data(test_file_list, csv_test_file)
 
+def copy_growth_death_data_of_a(src_folder):
+    train_file_list = []
+    test_file_list = []
+    try:
+        exchange = 'a'
+        print(exchange)
+        exchange_train_folder = os.path.join(src_folder, exchange, 'growth_death_data/train')
+        train_h5_files = [os.path.join(exchange_train_folder, f) for f in os.listdir(exchange_train_folder) if
+                          f.endswith('.h5')]
+        train_file_list += train_h5_files
+        exchange_test_folder = os.path.join(src_folder, exchange, 'growth_death_data/test')
+        test_h5_files = [os.path.join(exchange_test_folder, f) for f in os.listdir(exchange_test_folder) if
+                         f.endswith('.h5')]
+        test_file_list += test_h5_files
+    except:
+        pass
+
+    random.shuffle(train_file_list)
+    train_num = len(train_file_list)
+    print(train_num)
+    print(len(test_file_list))
+    # train_file_list0 = train_file_list[:int(0.5*train_num)]
+    # train_file_list1 = train_file_list[int(0.5*train_num):]
+
+    csv_train_file = 'growth_death_train_data_17.csv'
+    csv_test_file = 'growth_death_test_data_17.csv'
+
+    write_growth_death_data(train_file_list, csv_train_file)
+    write_growth_death_data(test_file_list, csv_test_file)
+
 if __name__ == '__main__':
     # copy_financial_forecast_train_data()
     # copy_growth_and_death_data()
-    copy_growth_death_data('D:')
+    # copy_growth_death_data('D:')
     # csv_to_parquet('D:/Shenzhen/growth_death_data/test2')
+    copy_growth_death_data_of_a('D:')

@@ -61,8 +61,8 @@ def train_catboost():
     train_data = pd.read_csv('growth_death_train_data_17.csv')
     # train_data = pd.read_csv('growth_death_train_data_17.csv', engine='pyarrow')
     print(len(train_data))
-    train_data = train_data.sample(frac=1, random_state=None)
     train_data = train_data.dropna()
+    train_data = train_data.sample(frac=1, random_state=None)
     train_data = train_data.reset_index(drop=True)
     print(len(train_data))
 
@@ -75,8 +75,8 @@ def train_catboost():
 
     validate_input = train_data.iloc[-validate_num:, 2:-2]
     validate_growth = train_data.iloc[-validate_num:, -2]
-    model_growth = CatBoostRegressor(iterations=data_num, learning_rate=0.01, min_data_in_leaf=29, depth=7,
-                                     loss_function='MAPE', eval_metric='MAPE', task_type='GPU', devices='0:1', early_stopping_rounds=1000)
+    model_growth = CatBoostRegressor(iterations=data_num, learning_rate=0.01, min_data_in_leaf=23, depth=7,
+                                     loss_function='MAPE', eval_metric='MAPE', task_type='GPU', devices='0:1', early_stopping_rounds=2000)
     # 训练模型，并设置验证集
     model_growth.fit(
         train_input, train_growth,
@@ -101,7 +101,7 @@ def train_catboost():
     validate_input = train_data.iloc[-validate_num:, 2:-2]
     validate_death = train_data.iloc[-validate_num:, -1]
     model_death = CatBoostRegressor(iterations=data_num, learning_rate=0.01, min_data_in_leaf=23, depth=7,
-                                    loss_function='MAPE', eval_metric='MAPE', task_type='GPU', devices='0:1', early_stopping_rounds=1000)
+                                    loss_function='MAPE', eval_metric='MAPE', task_type='GPU', devices='0:1', early_stopping_rounds=2000)
     # 训练模型，并设置验证集
     model_death.fit(
         train_input, train_death,
@@ -350,8 +350,8 @@ def metric_catboost_model():
             death_mae = death_mae + abs(predict_death - fact_death)
             growth_rmse = growth_rmse + (predict_growth - fact_growth)**2
             death_rmse = death_rmse + (predict_death - fact_death)**2
-            growth_mape = growth_mape + abs(predict_growth - fact_growth)/fact_growth
-            death_mape = death_mape + abs(predict_death - fact_death)/fact_death
+            growth_mape = growth_mape + abs((predict_growth - fact_growth)/fact_growth)
+            death_mape = death_mape + abs((predict_death - fact_death)/fact_death)
             count_num = count_num + 1
     growth_mae = growth_mae/float(count_num)
     death_mae = death_mae/float(count_num)
@@ -548,6 +548,24 @@ def get_growth_death():
     print(add_symbols)
     predict_data.to_csv('candidate_symbols.csv', index=False)
 
+def get_growth_death_of_a():
+    get_exchange_growth_death('a')
+    predict_data = pd.read_csv('a/grow_death_predict.csv', engine='pyarrow')
+    predict_data.sort_values(by='rank', inplace=True, ascending=False)
+    predict_data = predict_data.reset_index(drop=True)
+    predict_data = predict_data[predict_data['rank'] >= 1.17]
+    try:
+        pre_predict_data = pd.read_csv('candidate_symbols.csv')
+        delete_symbols = pre_predict_data[~pre_predict_data['symbol'].isin(predict_data['symbol'])].dropna()
+        add_symbols = predict_data[~predict_data['symbol'].isin(pre_predict_data['symbol'])].dropna()
+        print('删除的股票：')
+        print(delete_symbols)
+        print('添加的股票：')
+        print(add_symbols)
+    except:
+        pass
+    predict_data.to_csv('candidate_symbols.csv', index=False)
+
 def get_symbol_rank(symbol):
     predict_data_shenzhen = pd.read_csv('Shenzhen/grow_death_predict.csv', engine='pyarrow')
     predict_data_shanghai = pd.read_csv('Shanghai/grow_death_predict.csv', engine='pyarrow')
@@ -577,5 +595,6 @@ if __name__ == '__main__':
     # stocks = get_exchange_stock('SAU')
     # print(stocks)
     # get_all_countries()
-    get_growth_death()
+    # get_growth_death()
     # get_symbol_rank('002461.SZSE')
+    get_growth_death_of_a()
